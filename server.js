@@ -56,8 +56,8 @@ const LANGUAGES = {
   javascript: {
     image: 'node:22-alpine', extension: '.js',
     command: file => ['node', file],
-    installCommand: pkg => ['npm', 'install', '--no-audit', '--no-fund', '--prefix', '/workspace/.packages/node', pkg],
-    env: ['NODE_PATH=/workspace/.packages/node/node_modules']
+    installCommand: pkg => ['npm', 'install', '--no-audit', '--no-fund', '--prefix', '/workspace', pkg],
+    env: ['npm_config_cache=/tmp/npm-cache']
   }
 };
 
