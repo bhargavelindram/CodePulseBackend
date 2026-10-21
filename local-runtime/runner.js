@@ -1,15 +1,14 @@
 'use strict';
 
 // Local CodePulse runner. No HTTP service, API key, Docker, or SnapDeploy required.
-// This module expects Python 3 and Node.js to be installed on the computer.
-// Call runCode({ language, code }) from Electron's MAIN process only, via a
-// narrow, validated IPC handler. Never expose this module directly to a web page.
+// Requires Python 3 and Node.js to be installed on the computer.
+// Import from Electron's MAIN process only through a narrow, validated IPC handler.
+// This executes code with the current user's OS permissions; it is NOT a sandbox.
 
 const { spawn } = require('node:child_process');
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
-const crypto = require('node:crypto');
 
 const MAX_CODE_BYTES = 100 * 1024;
 const MAX_OUTPUT_CHARS = 64 * 1024;
@@ -25,9 +24,14 @@ function runProcess(executable, args, options = {}) {
     let stderr = '';
     let timedOut = false;
     let settled = false;
+    // Do not pass API keys, tokens, or other parent-process secrets into user code.
+    const env = { PATH: process.env.PATH || '' };
+    for (const key of ['SystemRoot', 'WINDIR', 'PATHEXT', 'TMP', 'TEMP']) {
+      if (process.env[key]) env[key] = process.env[key];
+    }
     const child = spawn(executable, args, {
       cwd: options.cwd,
-      env: { ...process.env, ...options.env },
+      env,
       stdio: ['ignore', 'pipe', 'pipe'],
       windowsHide: true,
       shell: false
