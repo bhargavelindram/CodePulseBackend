@@ -49,7 +49,7 @@ app.use((req, res, next) => {
 const LANGUAGES = {
   python: {
     image: 'python:3.12-slim', extension: '.py',
-    command: file => ['python', '-I', file],
+    command: file => ['python', file],
     installCommand: pkg => ['python', '-m', 'pip', 'install', '--disable-pip-version-check', '--no-input', '--no-cache-dir', '--target', '/workspace/.packages/python', pkg],
     env: ['PYTHONPATH=/workspace/.packages/python', 'PYTHONDONTWRITEBYTECODE=1']
   },
