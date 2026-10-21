@@ -13,6 +13,7 @@ const app = express();
 const docker = new Docker();
 const PORT = Number(process.env.PORT || 3000);
 const API_KEY = process.env.CODEPULSE_API_KEY;
+const WORKSPACE_ROOT = process.env.WORKSPACE_ROOT || os.tmpdir();
 const MAX_CODE_BYTES = 100000;
 const MAX_OUTPUT_BYTES = 65536;
 const RUN_TIMEOUT_MS = 10000;
@@ -87,9 +88,10 @@ async function ensureImage(image) {
 }
 async function getWorkspace(sessionId) {
   if (!validSessionId(sessionId)) throw new Error('sessionId must be 16-80 characters using letters, numbers, _ or -.');
+  await fs.mkdir(WORKSPACE_ROOT, { recursive: true });
   let entry = workspaces.get(sessionId);
   if (!entry) {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codepulse-'));
+    const dir = await fs.mkdtemp(path.join(WORKSPACE_ROOT, 'codepulse-'));
     entry = { dir, busy: false, lastUsed: Date.now() };
     workspaces.set(sessionId, entry);
   }
